@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지급품 발송 프로세스 위자드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c10;--surface:#141418;--card:#1c1c23;--border:#2c2c3a;--border2:#383848;
+  --a:#6c74ff;--adim:rgba(108,116,255,.12);--aglow:rgba(108,116,255,.22);
+  --green:#3ecf6e;--gdim:rgba(62,207,110,.1);
+  --yel:#f0c040;--ydim:rgba(240,192,64,.1);
+  --ora:#f07840;--odim:rgba(240,120,64,.1);
+  --red:#f04060;--rdim:rgba(240,64,96,.1);
+  --text:#e2e2ee;--muted:#72728a;--faint:#44445a;
+  --mono:'IBM Plex Mono',monospace
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:40px 16px 80px}
+
+/* PAGE HEADER */
+.hd{max-width:640px;margin:0 auto 36px}
+.hd-tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--a);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.hd-tag::before{content:'';width:20px;height:1px;background:var(--a)}
+.hd h1{font-size:clamp(22px,5vw,32px);font-weight:900;color:#fff;line-height:1.2;letter-spacing:-.02em;margin-bottom:10px}
+.hd p{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* PROGRESS */
+.pt{max-width:640px;margin:0 auto 28px;display:flex;align-items:center}
+.pi{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.pi:not(:last-child)::after{content:'';position:absolute;left:50%;top:13px;width:100%;height:1px;background:var(--border);z-index:0;transition:background .4s}
+.pi.past:not(:last-child)::after,.pi.act:not(:last-child)::after{background:var(--a)}
+.pd{width:26px;height:26px;border-radius:50%;background:var(--card);border:1.5px solid var(--faint);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);position:relative;z-index:1;transition:all .3s}
+.pi.past .pd{background:var(--a);border-color:var(--a);color:#fff;font-size:12px}
+.pi.act .pd{background:var(--a);border-color:var(--a);color:#fff;box-shadow:0 0 0 4px var(--adim)}
+.pl{font-size:10px;color:var(--muted);margin-top:5px;text-align:center;white-space:nowrap}
+.pi.act .pl{color:var(--a)}.pi.past .pl{color:var(--text)}
+
+/* WIZARD */
+.wz{max-width:640px;margin:0 auto}
+.wc{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;animation:rise .3s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wq{font-size:20px;font-weight:800;color:#fff;line-height:1.35;margin-bottom:6px;letter-spacing:-.01em}
+.wh{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:24px}
+
+/* OPTIONS */
+.og{display:grid;gap:10px}
+.og.c2{grid-template-columns:1fr 1fr}
+.opt{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:18px 18px 16px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:5px;text-align:left}
+.opt:hover{border-color:var(--a);background:var(--adim);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.oi{font-size:24px;margin-bottom:2px}
+.on{font-size:15px;font-weight:700;color:#fff}
+.od{font-size:12px;color:var(--muted);line-height:1.5}
+.ots{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.t{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:.04em}
+.tb{background:var(--adim);color:#a0aaff;border:1px solid rgba(108,116,255,.25)}
+.tg{background:var(--gdim);color:#6dd98f;border:1px solid rgba(62,207,110,.2)}
+.ty{background:var(--ydim);color:#d4a830;border:1px solid rgba(240,192,64,.2)}
+.to{background:var(--odim);color:#e08060;border:1px solid rgba(240,120,64,.2)}
+.tr{background:var(--rdim);color:#e07080;border:1px solid rgba(240,64,96,.2)}
+.tgr{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)}
+
+/* EXPAND */
+.xbtn{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;width:100%;transition:all .2s;text-align:left}
+.xbtn:hover{border-color:var(--a);background:var(--adim)}
+.xbtn-ico{font-size:20px}
+.xbtn-txt{flex:1}
+.xbtn-title{font-size:14px;font-weight:700;color:#fff}
+.xbtn-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.xarr{font-size:12px;color:var(--muted);transition:transform .25s}
+.xarr.open{transform:rotate(180deg)}
+.xgrid{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.xgrid.open{display:grid}
+
+/* SECTION LABEL */
+.sl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px;font-family:var(--mono)}
+
+/* BACK */
+.back{background:none;border:none;color:var(--muted);font-size:13px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 0 20px;transition:color .2s}
+.back:hover{color:var(--text)}
+
+/* RESULT BANNER */
+.rb{display:flex;align-items:flex-start;gap:16px;background:linear-gradient(135deg,rgba(108,116,255,.12),rgba(108,116,255,.04));border:1px solid rgba(108,116,255,.25);border-radius:14px;padding:20px 22px;margin-bottom:20px}
+.rb-ico{font-size:30px;flex-shrink:0}
+.rb-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px}
+.rb-sub{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+.chip{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:500}
+.cm{background:var(--adim);color:#b0b8ff;border:1px solid rgba(108,116,255,.3)}
+.cs{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border)}
+.cg{background:var(--gdim);color:#6dd98f;border:1px solid rgba(62,207,110,.25)}
+.co{background:var(--odim);color:#e08060;border:1px solid rgba(240,120,64,.25)}
+
+/* CHECKLIST */
+.cl{display:flex;flex-direction:column;gap:10px}
+.ci{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s}
+.ci.skip{opacity:.38}
+.ch{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none}
+.ch:hover{background:rgba(255,255,255,.02)}
+.ci.skip .ch{cursor:default}.ci.skip .ch:hover{background:none}
+.cn{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;background:var(--adim);color:var(--a);border:1px solid rgba(108,116,255,.2)}
+.ci.skip .cn{background:rgba(255,255,255,.04);color:var(--faint);border-color:var(--border)}
+.cinfo{flex:1}
+.clabel{font-size:14px;font-weight:700;color:#fff}
+.cbrief{font-size:11px;color:var(--muted);margin-top:2px}
+.carr{font-size:11px;color:var(--muted);transition:transform .25s}
+.carr.open{transform:rotate(180deg)}
+.cb{display:none;border-top:1px solid var(--border);padding:16px 18px;background:rgba(0,0,0,.18)}
+.cb.open{display:block}
+
+/* INFO */
+.ib{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px;font-size:13px;line-height:1.7}
+.ib:last-child{margin-bottom:0}
+.ir{display:flex;gap:10px;margin-bottom:6px;align-items:flex-start}
+.ir:last-child{margin-bottom:0}
+.ik{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;width:44px;flex-shrink:0;padding-top:2px}
+.iv{color:var(--text);font-size:13px;line-height:1.6}
+.iv a{color:var(--a);text-decoration:none}.iv a:hover{text-decoration:underline}
+.wb{display:flex;gap:8px;align-items:flex-start;background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:11px 13px;font-size:12px;color:#c8a840;line-height:1.6;margin-bottom:8px}
+.wb:last-child{margin-bottom:0}
+.nb{display:flex;gap:8px;align-items:flex-start;background:rgba(108,116,255,.07);border:1px solid rgba(108,116,255,.18);border-radius:8px;padding:11px 13px;font-size:12px;color:#9098e0;line-height:1.6;margin-bottom:8px}
+.nb:last-child{margin-bottom:0}
+.gb{display:flex;gap:8px;align-items:flex-start;background:rgba(62,207,110,.07);border:1px solid rgba(62,207,110,.18);border-radius:8px;padding:11px 13px;font-size:12px;color:#5cc87a;line-height:1.6;margin-bottom:8px}
+.gb:last-child{margin-bottom:0}
+.sp{display:inline-block;background:rgba(255,255,255,.05);color:var(--muted);font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid var(--border);margin-bottom:8px}
+.st{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* QUICK LINKS */
+.ql{margin-top:22px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+.ql-t{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+.ql-l{display:flex;flex-direction:column;gap:7px}
+.ql-a{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(108,116,255,.06);border:1px solid rgba(108,116,255,.13);border-radius:9px;text-decoration:none;font-size:13px;color:var(--a);transition:all .2s}
+.ql-a:hover{background:rgba(108,116,255,.13);border-color:var(--a)}
+
+/* RESET */
+.rst{width:100%;margin-top:18px;padding:13px;background:none;border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-family:'Noto Sans KR',sans-serif;font-size:14px;cursor:pointer;transition:all .2s}
+.rst:hover{border-color:var(--a);color:var(--text)}
+
+/* Kissflow badge callout */
+.kf-need{background:var(--rdim);border:1px solid rgba(240,64,96,.25);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#e07080;line-height:1.6;margin-bottom:8px}
+.kf-ok{background:var(--gdim);border:1px solid rgba(62,207,110,.25);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#5cc87a;line-height:1.6;margin-bottom:8px}
+
+@media(max-width:480px){
+  .og.c2,.xgrid{grid-template-columns:1fr}
+  .wc{padding:22px 16px}
+  .pl{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="hd-tag">KDC Team · 내부 운영 가이드</div>
+  <h1>지급품 발송<br>프로세스 위자드</h1>
+  <p>아래 질문에 순서대로 답하면, 내 케이스에 해당하는 단계만 정리된 체크리스트를 바로 확인할 수 있어요.</p>
+</div>
+
+<div id="pt" class="pt"></div>
+<div class="wz" id="wz"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// 위키 기준 거점 데이터
+// Kissflow 여부는 거점 + 발송방법 조합으로 결정됨 (stepResult 참조)
+// ══════════════════════════════════════════════════════
+const LOC = {
+  // 역삼/서초/판교: 행낭 가능, 퀵 시 Kissflow 필요
+  '역삼':  { grp:'A', label:'역삼',   detail:'센터필드 EAST, 강남구 테헤란로 231',              contact:'이창현 (Changhyun Lee) — Workplace Team', helpdesk:'역삼 EAST 34F 헬프데스크' },
+  '서초':  { grp:'A', label:'서초',   detail:'마제스타시티타워 1, 서초구 서초대로38길 12',       contact:'이창현 (Changhyun Lee) — Workplace Team', helpdesk:'서초 웰컴데스크' },
+  '판교':  { grp:'A', label:'판교',   detail:'그레이츠 판교, 성남시 분당구 분당내곡로 117',     contact:'이창현 (Changhyun Lee) — Workplace Team', helpdesk:'판교 웰컴데스크' },
+  // 판교 빌딩 내 스튜디오: Kissflow 불필요
+  'OmniCraft Labs': { grp:'B', label:'판교 (OmniCraft Labs)', detail:'그레이츠판교 14F, 성남시 분당구 분당내곡로117',    contact:'전민영 — OCL Operations Team',            email:'minyoung.jeon@omnicraftlabs.co.kr' },
+  'inZOI Studio':   { grp:'B', label:'판교 (inZOI Studio)',   detail:'그레이츠판교 14F, 성남시 분당구 분당내곡로 117',  contact:'기혜준 / 이창준 — inZOI Operations Dept', email:'hjki@inzoistudio.com / cjlee@inzoistudio.com' },
+  // 그 외: 행낭 불가, 퀵만, Kissflow 항상 필요
+  '삼성 (RisingWings)':  { grp:'C', label:'삼성',   detail:'강남구 영동대로82길 7 1층',                         contact:'신영욱 — RW People Team',        email:'psyyoung1@risingwings.com' },
+  '서현 (Dreamotion)':   { grp:'C', label:'서현',   detail:'성남시 분당구 황새울로 335번길 10, 멜로즈프라자 401호', contact:'한봄이 — DM People Team',        email:'bomi@dreamotion.us' },
+  '마포 (5minlab)':      { grp:'C', label:'마포',   detail:'마포구 양화로19, 8층',                             contact:'김공주 — 5ml Operations Dept.', email:'gongju.kim@5minlab.com' },
+  '강남 (Flyway Games)': { grp:'C', label:'강남',   detail:'서초구 강남대로 327 서초대륭타워 18층',               contact:'조아라 — FWG People Team',       email:'araaa@flywaygames.com' },
+  '강남 (JOFSOFT)':      { grp:'C', label:'강남',   detail:'강남구 테헤란로5길 7, KG타워 8층 120호',             contact:'안주현 — JOF Operations Team',   email:'lily@jofsoft.com' },
+  '압구정 (오버데어)':   { grp:'C', label:'압구정', detail:'강남구 압구정로 152 극동타워 9층',                   contact:'조성민 — OVDR People Part',      email:'csm@overdare.com' },
+  '성남 (ReLU Games)':   { grp:'C', label:'성남',   detail:'성남시 분당구 성남대로 151 2층 225,226호',           contact:'이진아 — ReLU People Team',      email:'jinalee@relugames.com' },
+};
+
+// ══════════════════════════════════════════════════════
+// Kissflow 필요 여부 결정 (위키 Kissflow 섹션 기준)
+// - 역삼/서초/판교(grp A) + 행낭 → 불필요
+// - 역삼/서초/판교(grp A) + 퀵   → 필요
+// - 판교 내 스튜디오(grp B)       → 불필요
+// - 그 외 거점(grp C)             → 항상 필요
+// ══════════════════════════════════════════════════════
+function needKissflow(locKey, shipping) {
+  const l = LOC[locKey];
+  if (l.grp === 'A') return shipping === '퀵';
+  if (l.grp === 'B') return false;
+  return true; // grp C
+}
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let S = { step:1, purpose:null, location:null, shipping:null };
+
+function reset() { S={step:1,purpose:null,location:null,shipping:null}; render(); }
+
+// grp A 거점은 발송 방법 선택 step이 추가됨
+function isGrpA() { return S.location && LOC[S.location]?.grp === 'A'; }
+
+function stepLabels() {
+  const base = ['발송 목적', '수령 거점'];
+  if (isGrpA()) base.push('발송 방법');
+  base.push('체크리스트');
+  return base;
+}
+
+function visualStep() {
+  if (S.step===1) return 0;
+  if (S.step===2) return 1;
+  if (isGrpA()) { if(S.step===3) return 2; if(S.step===4) return 3; }
+  else { if(S.step===3) return 2; }
+  return 0;
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER ORCHESTRATOR
+// ══════════════════════════════════════════════════════
+function render() {
+  const labels = stepLabels();
+  const vStep  = visualStep();
+
+  // Progress bar
+  const pt = document.getElementById('pt'); pt.innerHTML='';
+  labels.forEach((lbl,i) => {
+    const cls = i<vStep?'past':i===vStep?'act':'';
+    const el  = document.createElement('div'); el.className=`pi ${cls}`;
+    el.innerHTML=`<div class="pd">${i<vStep?'✓':i+1}</div><div class="pl">${lbl}</div>`;
+    pt.appendChild(el);
+  });
+
+  // Card
+  const wz = document.getElementById('wz'); wz.innerHTML='';
+  const card = document.createElement('div'); card.className='wc';
+  if (S.step>1) card.innerHTML+=`<button class="back" onclick="goBack()">← 이전으로</button>`;
+
+  if      (S.step===1) renderStep1(card);
+  else if (S.step===2) renderStep2(card);
+  else if (S.step===3 && isGrpA()) renderStep3(card);
+  else renderResult(card);
+
+  wz.appendChild(card);
+}
+
+// ══════════════════════════════════════════════════════
+// STEP 1 — 발송 목적
+// ══════════════════════════════════════════════════════
+function renderStep1(card) {
+  card.innerHTML += `
+    <div class="wq">이번 발송의 목적이 무엇인가요?</div>
+    <div class="wh">목적에 따라 양식 작성과 메일 발송 여부가 달라져요.</div>
+    <div class="og c2">
+      <div class="opt" onclick="p1('event')">
+        <div class="oi">🎁</div>
+        <div class="on">이벤트 / 당첨자 배부</div>
+        <div class="od">여러 구성원에게 배부<br>리스트 등록 & 메일 발송 필요</div>
+        <div class="ots"><span class="t tb">명단 필요</span><span class="t tb">메일 작성</span></div>
+      </div>
+      <div class="opt" onclick="p1('simple')">
+        <div class="oi">📦</div>
+        <div class="on">단순 물품 전달</div>
+        <div class="od">분실물 반환 등<br>메일 없이 물품만 전달</div>
+        <div class="ots"><span class="t tgr">리스트 불필요</span><span class="t tg">간소 절차</span></div>
+      </div>
+    </div>`;
+}
+function p1(v){S.purpose=v; S.step=2; render();}
+
+// ══════════════════════════════════════════════════════
+// STEP 2 — 수령 거점
+// ══════════════════════════════════════════════════════
+function renderStep2(card) {
+  card.innerHTML += `
+    <div class="wq">수령 거점을 선택해 주세요</div>
+    <div class="wh">Kissflow 신청 여부와 담당자 연락처가 거점에 따라 달라져요.</div>
+    <div class="sl">행낭/퀵 모두 가능 · Workplace 헬프/웰컴데스크 지원 거점</div>
+    <div class="og c2">
+      <div class="opt" onclick="p2('역삼')">
+        <div class="oi">🏢</div><div class="on">역삼</div>
+        <div class="od">센터필드 EAST/WEST</div>
+        <div class="ots"><span class="t tg">행낭 가능</span><span class="t ty">퀵→Kissflow</span></div>
+      </div>
+      <div class="opt" onclick="p2('서초')">
+        <div class="oi">🏛️</div><div class="on">서초</div>
+        <div class="od">마제스타시티타워</div>
+        <div class="ots"><span class="t tg">행낭 가능</span><span class="t ty">퀵→Kissflow</span></div>
+      </div>
+      <div class="opt" onclick="p2('판교')">
+        <div class="oi">🏗️</div><div class="on">판교</div>
+        <div class="od">그레이츠 판교 (Bluehole)</div>
+        <div class="ots"><span class="t tg">행낭 가능</span><span class="t ty">퀵→Kissflow</span></div>
+      </div>
+    </div>
+    <div class="sl">판교 빌딩 내 스튜디오 · Kissflow 불필요</div>
+    <div class="og c2">
+      <div class="opt" onclick="p2('OmniCraft Labs')">
+        <div class="oi">🔧</div><div class="on">OmniCraft Labs</div>
+        <div class="od">그레이츠판교 14F</div>
+        <div class="ots"><span class="t tg">Kissflow 불필요</span><span class="t tb">판교 통일</span></div>
+      </div>
+      <div class="opt" onclick="p2('inZOI Studio')">
+        <div class="oi">🎨</div><div class="on">inZOI Studio</div>
+        <div class="od">그레이츠판교 14F</div>
+        <div class="ots"><span class="t tg">Kissflow 불필요</span><span class="t tb">판교 통일</span></div>
+      </div>
+    </div>
+    <div class="sl">그 외 거점 · 행낭 불가 · Kissflow 항상 필요</div>
+    <button class="xbtn" id="xb" onclick="toggleX()">
+      <span class="xbtn-ico">📍</span>
+      <span class="xbtn-txt">
+        <div class="xbtn-title">삼성 · 서현 · 마포 · 강남 · 압구정 · 성남</div>
+        <div class="xbtn-sub">클릭하면 목록이 펼쳐져요</div>
+      </span>
+      <span class="xarr" id="xa">▼</span>
+    </button>
+    <div class="xgrid" id="xg">
+      ${[
+        ['삼성 (RisingWings)','🎮','강남구 영동대로'],
+        ['서현 (Dreamotion)','🎯','성남시 분당구'],
+        ['마포 (5minlab)','⚡','마포구 양화로'],
+        ['강남 (Flyway Games)','✈️','서초구 강남대로'],
+        ['강남 (JOFSOFT)','💡','강남구 테헤란로'],
+        ['압구정 (오버데어)','🌐','강남구 압구정로'],
+        ['성남 (ReLU Games)','🧩','성남시 분당구'],
+      ].map(([k,i,s])=>`
+        <div class="opt" onclick="p2('${k}')">
+          <div class="oi">${i}</div><div class="on">${k}</div>
+          <div class="od">${s}</div>
+          <div class="ots"><span class="t to">Kissflow 필요</span><span class="t tgr">행낭 불가</span></div>
+        </div>`).join('')}
+    </div>`;
+}
+function toggleX(){const g=document.getElementById('xg'),a=document.getElementById('xa');const o=g.classList.toggle('open');if(a)a.classList.toggle('open',o);}
+function p2(loc){S.location=loc; S.shipping=null; S.step=(LOC[loc].grp==='A')?3:3; render();}
+
+// grp B,C도 step=3이지만 isGrpA()가 false이므로 renderResult로 감 (step3은 grpA only)
+
+// ══════════════════════════════════════════════════════
+// STEP 3 — 발송 방법 (grp A only: 역삼/서초/판교)
+// ══════════════════════════════════════════════════════
+function renderStep3(card) {
+  const loc = LOC[S.location];
+  card.innerHTML += `
+    <div class="wq">발송 방법을 선택해 주세요</div>
+    <div class="wh"><strong>${loc.label}</strong> 거점은 행낭과 퀵 두 가지를 이용할 수 있어요. 물품 크기와 도착 필요 시간을 고려해 선택해 주세요.</div>
+    <div class="og c2">
+      <div class="opt" onclick="p3('행낭')">
+        <div class="oi">📬</div>
+        <div class="on">행낭</div>
+        <div class="od">헬프/웰컴데스크 경유 발송<br>노트북 가방 크기 이하만 가능</div>
+        <div class="ots">
+          <span class="t tg">Kissflow 불필요</span>
+          <span class="t tb">오후 1시 / 4시</span>
+          <span class="t ty">30분 전 전달</span>
+        </div>
+      </div>
+      <div class="opt" onclick="p3('퀵')">
+        <div class="oi">🛵</div>
+        <div class="on">퀵</div>
+        <div class="od">크기 제한 없음 · 상시 가능<br>4시까지 전달 권장</div>
+        <div class="ots">
+          <span class="t to">Kissflow 필요</span>
+          <span class="t tg">상시 가능</span>
+          <span class="t ty">4시까지 권장</span>
+        </div>
+      </div>
+    </div>
+    <div class="wb" style="margin-top:14px;">⚠️ 퀵 4시 30분 이후 발송 건은 7시 이후 도착 가능성이 있어요. 7시 이후엔 수령 등록 데스크 인원 없음.</div>`;
+}
+function p3(v){S.shipping=v; S.step=4; render();}
+
+// ══════════════════════════════════════════════════════
+// RESULT — 체크리스트
+// ══════════════════════════════════════════════════════
+function renderResult(card) {
+  const loc      = LOC[S.location];
+  const isEvent  = S.purpose === 'event';
+  const grp      = loc.grp;           // A=역삼/서초/판교, B=판교내, C=그외
+  const shipping = S.shipping;        // 행낭 | 퀵 | null(grpB,C)
+  const kf       = needKissflow(S.location, shipping); // Kissflow 필요 여부
+  const isGrpA   = grp === 'A';
+  const isGrpB   = grp === 'B';
+
+  // 수신처 (이벤트 메일 발송 시)
+  const mailTo   = isGrpA ? '이창현 (Changhyun Lee) — Workplace Team' : loc.contact;
+  const mailNote = !isGrpA ? '⚠️ 수령자가 리스트에서 직접 확인 후 수령하도록 거점 담당자에게 안내 요청 필요' : '💡 미수령자 명단 요청 내용을 추가하면 리마인드 발송 시 활용 가능';
+
+  // Chips
+  const chips = [
+    `<div class="chip cm">${loc.label}</div>`,
+    `<div class="chip cm">${isEvent?'이벤트 배부':'단순 전달'}</div>`,
+    shipping ? `<div class="chip cs">${shipping} 발송</div>` : '',
+    kf ? `<div class="chip co">Kissflow 필요</div>` : `<div class="chip cg">Kissflow 불필요</div>`,
+  ].join('');
+
+  let html = `
+    <div class="rb">
+      <div class="rb-ico">🗂️</div>
+      <div>
+        <div class="rb-title">맞춤 발송 체크리스트</div>
+        <div class="rb-sub">선택한 케이스에 맞는 단계만 표시돼요. 각 항목을 눌러 세부 내용을 확인하세요.</div>
+      </div>
+    </div>
+    <div class="chips">${chips}</div>
+    <div class="cl">`;
+
+  let sn = 1; // step number counter
+  const n = () => sn++;
+
+  // ─── 1. 명단 추출 & 거점 분류 (이벤트만) ────────────────
+  if (isEvent) {
+    html += item(n(), '명단 추출 & 거점별 분류', '수령 대상자 정리 → HUB 조회 → 거점별 분류', false, `
+      <div class="ib">
+        <div class="ir"><span class="ik">확인</span><span class="iv">HUB 구성원 조회 → Workday 프로필 → 위치 확인 또는 좌석 배치도</span></div>
+        <div class="ir"><span class="ik">팁</span><span class="iv">엑셀에서 거점별 시트로 미리 분류해 두면 양식 작성 시 편리해요</span></div>
+      </div>`);
+
+    // ─── 2. 양식 작성 & 메일 발송 ──────────────────────────
+    html += item(n(), '지급 요청 양식 작성 & 메일 발송', '양식 다운로드 → 거점별 시트 작성 → 메일 발송', false, `
+      <div class="ib">
+        <div class="ir"><span class="ik">양식</span><span class="iv"><a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQCvXJzHQVLnSY6cEf6xv67iAXCAd6gXBFAiN5igIoesmkg" target="_blank">📎 지급품 일괄등록 양식 (다운로드)</a></span></div>
+        <div class="ir"><span class="ik">예시</span><span class="iv"><a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQAZAbgZkz-DSo57XALTnbq8AZFQwKwlhxO_zY_LBp2cB_4?e=cTdWh7" target="_blank">📋 작성 예시 보기</a></span></div>
+        <div class="ir"><span class="ik">작성</span><span class="iv">거점별 별도 시트 생성 (역삼은 EAST/WEST 분리) · 비고란: 물품 여러 개 시 쉼표 구분 — 예) "스티커, 수건, 하이볼"</span></div>
+      </div>
+      <div class="ib">
+        <div class="ir"><span class="ik">수신</span><span class="iv">${mailTo}</span></div>
+        ${!isGrpA ? `<div class="ir"><span class="ik">메일</span><span class="iv">${loc.email}</span></div>` : ''}
+        <div class="ir"><span class="ik">참조</span><span class="iv">Workplace팀 + 소속 팀 (예: KDC팀)</span></div>
+        <div class="ir"><span class="ik">첨부</span><span class="iv">위에서 작성한 지급품 일괄등록 양식</span></div>
+      </div>
+      <div class="nb">${mailNote}</div>`);
+  }
+
+  // ─── 3. 물품 패킹 ──────────────────────────────────────
+  let packBody = '';
+  if (isGrpA && shipping === '행낭') {
+    packBody = `
+      <div class="ib">
+        <div class="ir"><span class="ik">경로</span><span class="iv">${loc.helpdesk}에서 각 수령지로 일괄 발송</span></div>
+        <div class="ir"><span class="ik">시간</span><span class="iv">하루 두 번 — 오후 1시 / 오후 4시</span></div>
+        <div class="ir"><span class="ik">전달</span><span class="iv">원하는 발송 시간 <strong>최소 30분 전</strong>에 헬프데스크에 물품 + 양식 전달 필요</span></div>
+        <div class="ir"><span class="ik">크기</span><span class="iv">노트북 가방에 들어가는 크기만 가능</span></div>
+      </div>
+      <div class="gb">✅ 행낭 발송 시 Kissflow 신청 불필요해요.</div>`;
+  } else if (isGrpA && shipping === '퀵') {
+    packBody = `
+      <div class="ib">
+        <div class="ir"><span class="ik">방법</span><span class="iv">퀵서비스 이용 — 상시 가능</span></div>
+        <div class="ir"><span class="ik">권장</span><span class="iv">오후 4시까지 전달 권장</span></div>
+      </div>
+      <div class="wb">⚠️ 4시 30분 이후 발송 건은 7시 이후 도착 가능성이 있어요. 7시 이후엔 수령 등록 데스크 인원 없음.</div>
+      <div class="kf-need">🔴 퀵 발송 시 Kissflow 티켓 상신이 필요해요. 아래 단계를 진행하세요.</div>`;
+  } else {
+    packBody = `
+      <div class="ib">
+        <div class="ir"><span class="ik">방식</span><span class="iv">퀵서비스로 거점 담당자에게 발송</span></div>
+        ${isEvent ? `<div class="ir"><span class="ik">팁</span><span class="iv">20명 이상 배부 시: 부서별 패킹 또는 ㄱㄴㄷ순 패킹 권장</span></div>` : ''}
+      </div>
+      ${isGrpB ? '<div class="gb">✅ 판교 빌딩 내 위치로 Kissflow 신청 불필요해요.</div>' : '<div class="kf-need">🔴 그 외 거점은 발송 방법과 무관하게 Kissflow 티켓 상신이 필요해요.</div>'}`;
+  }
+  html += item(n(), '물품 패킹', isGrpA ? `${shipping} 발송 준비` : '패킹 후 퀵 발송', false, packBody);
+
+  // ─── 4. Kissflow 시스템 처리 ───────────────────────────
+  if (!kf) {
+    const note = isGrpB
+      ? `${loc.label}은 판교 거점 빌딩 내(14F) 위치로 Kissflow 신청 불필요해요.`
+      : `역삼/서초/판교 행낭 발송 시 헬프/웰컴데스크에서 일괄등록 양식 기반으로 직접 배포 지원해요.`;
+    html += item(n(), 'Kissflow 시스템 처리', '해당 없음 — 건너뛰기', true, `
+      <div class="sp">Kissflow 신청 불필요</div>
+      <div class="st">${note}</div>`);
+  } else {
+    const kfInput = isGrpA
+      ? `거점 별 담당자 이름 / 연락처 / 거점 주소 (수취인 1명 시: 해당 수령자 이름 / 연락처 / 수령 가능 주소)`
+      : `${loc.contact} / ${loc.email} / ${loc.detail}`;
+    html += item(n(), 'Kissflow 시스템 처리', '업무용 문서 발송 신청서 접수', false, `
+      <div class="ib">
+        <div class="ir"><span class="ik">링크</span><span class="iv"><a href="https://krafton.kissflow.com/view/process/DSA/myitems/Draft" target="_blank">🔗 Kissflow 신청서 바로가기</a></span></div>
+        <div class="ir"><span class="ik">수취</span><span class="iv">${kfInput}</span></div>
+        ${!isGrpA ? `<div class="ir"><span class="ik">주소</span><span class="iv">${loc.detail}</span></div>` : ''}
+      </div>
+      ${!isGrpA ? '<div class="wb">⚠️ 거점 담당자와 사전 개별 협의 후 신청 권장</div>' : ''}
+      <div class="nb">💡 거점별 담당자 정보는 <a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR" target="_blank">거점별 전체 정보 보기</a> 참조</div>`);
+  }
+
+  // ─── 5. 헬프/웰컴데스크 탭 신청 (grp A only) ──────────
+  if (!isGrpA) {
+    html += item(n(), '헬프/웰컴데스크 탭 신청', '해당 없음 — 역삼/서초/판교 기준 절차', true, `
+      <div class="sp">해당 없음</div>
+      <div class="st">헬프/웰컴데스크 탭 신청은 역삼/서초/판교 거점 기준 절차예요. 그 외 거점은 거점 담당자와 개별 협의하세요.</div>`);
+  } else {
+    const tabInfo = shipping === '행낭'
+      ? `<div class="ib">
+           <div class="ir"><span class="ik">위치</span><span class="iv">${loc.helpdesk}</span></div>
+           <div class="ir"><span class="ik">신청</span><span class="iv">헬프데스크 탭 → 행낭 탭 선택</span></div>
+           <div class="ir"><span class="ik">주의</span><span class="iv">발송 시간(1시 / 4시) <strong>최소 30분 전</strong>에 물품 + 양식 전달 완료</span></div>
+         </div>`
+      : `<div class="ib">
+           <div class="ir"><span class="ik">위치</span><span class="iv">${loc.helpdesk}</span></div>
+           <div class="ir"><span class="ik">신청</span><span class="iv">헬프데스크 탭 → 퀵 배송 탭 선택</span></div>
+           <div class="ir"><span class="ik">주의</span><span class="iv">오후 4시까지 전달 권장 (4시 30분 이후 → 7시 이후 도착 가능)</span></div>
+         </div>`;
+    html += item(n(), '헬프/웰컴데스크 탭 신청', `${shipping} 탭 신청`, false, tabInfo);
+  }
+
+  // ─── 6. 수령 안내 메일 (이벤트만) ─────────────────────
+  if (isEvent) {
+    const timingNote = !isGrpA
+      ? '역삼/서초/판교 외 거점은 배송 소요 시간 고려 — 발송 요청 후 <strong>다음날 또는 차주</strong>에 메일 발송 권장'
+      : '발송 요청 후 수령 가능 상태가 되면 수령 안내 메일 발송';
+    html += item(n(), '수령 안내 메일 발송', '이벤트 당첨 축하 + 수령 방법 안내', false, `
+      <div class="ib">
+        <div class="ir"><span class="ik">발신</span><span class="iv">숨은 참조(BCC)로 수령 대상자 전원</span></div>
+        <div class="ir"><span class="ik">내용</span><span class="iv">이벤트 당첨 축하 + 수령 위치 / 방법 안내</span></div>
+        <div class="ir"><span class="ik">타이밍</span><span class="iv">${timingNote}</span></div>
+      </div>
+      <div class="nb">💡 필요 시 리마인드 메일 발송 후 남은 지급품 수거</div>`);
+  }
+
+  html += `</div>`;
+
+  // ─── 빠른 링크 ─────────────────────────────────────────
+  let qlLinks = `
+    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQCvXJzHQVLnSY6cEf6xv67iAXCAd6gXBFAiN5igIoesmkg" target="_blank">📎 지급품 일괄등록 양식</a>
+    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQAZAbgZkz-DSo57XALTnbq8AZFQwKwlhxO_zY_LBp2cB_4?e=cTdWh7" target="_blank">📋 양식 작성 예시</a>
+    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:f:/s/KDCPlanningSHP/IgA6c7TI4-bQRY2U68n2LSI4AWbuYB1ILle4_zU7ctu1gvE" target="_blank">🗂️ 거점별 양식 & 정보 폴더</a>
+    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR" target="_blank">📍 거점별 전체 정보 (담당자 목록)</a>`;
+  if (kf) qlLinks += `<a class="ql-a" href="https://krafton.kissflow.com/view/process/DSA/myitems/Draft" target="_blank">⚙️ Kissflow 신청서</a>`;
+
+  html += `
+    <div class="ql">
+      <div class="ql-t">빠른 링크</div>
+      <div class="ql-l">${qlLinks}</div>
+    </div>
+    <button class="rst" onclick="reset()">↩ 처음부터 다시</button>`;
+
+  card.innerHTML += html;
+  setTimeout(initAccordion, 50);
+}
+
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
+function item(num, label, brief, skip, body) {
+  return `<div class="ci${skip?' skip':''}">
+    <div class="ch">
+      <div class="cn">${skip?'−':num}</div>
+      <div class="cinfo"><div class="clabel">${label}</div><div class="cbrief">${brief}</div></div>
+      <div class="carr">▼</div>
+    </div>
+    <div class="cb">${body}</div>
+  </div>`;
+}
+
+function initAccordion() {
+  document.querySelectorAll('.ch').forEach(h => {
+    const ci = h.closest('.ci');
+    if (ci?.classList.contains('skip')) return;
+    h.addEventListener('click', () => {
+      const b = h.nextElementSibling, a = h.querySelector('.carr');
+      b.classList.toggle('open'); if (a) a.classList.toggle('open');
+    });
+  });
+  const f = document.querySelector('.ci:not(.skip) .cb');
+  const fa = document.querySelector('.ci:not(.skip) .carr');
+  if (f) { f.classList.add('open'); if (fa) fa.classList.add('open'); }
+}
+
+function goBack() {
+  S.step = Math.max(1, S.step - 1);
+  if (S.step === 1) S = { step:1, purpose:null, location:null, shipping:null };
+  else if (S.step === 2) { S.location = null; S.shipping = null; }
+  else if (S.step === 3) S.shipping = null;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
