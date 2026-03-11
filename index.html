@@ -158,6 +158,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <h1>지급품 발송<br>프로세스 위자드</h1>
   <p>아래 질문에 순서대로 답하면, 내 케이스에 해당하는 단계만 정리된 체크리스트를 바로 확인할 수 있어요.</p>
   <p style="font-size:11px;color:#6868a0;margin-top:8px;letter-spacing:0.02em;">* 본 문서는 역삼 HQ 발송 기준으로 작성되었습니다.</p>
+  <p style="font-size:11px;color:#52526a;margin-top:12px;text-align:center;letter-spacing:0.03em;">문의 · 건의 — KDC 팀 심현희</p>
 </div>
 
 <div id="pt" class="pt"></div>
@@ -439,7 +440,7 @@ function renderResult(card) {
         <div class="ir"><span class="ik">작성</span><span class="iv">거점별 별도 시트 생성 (역삼은 EAST/WEST 분리) · 비고란: 물품 여러 개 시 쉼표 구분 — 예) "스티커, 수건, 하이볼"</span></div>
       </div>
       <div class="ib">
-        <div class="ir"><span class="ik">수신</span><span class="iv">${mailTo}<br><span style="font-size:11px;color:var(--muted);">📋 개인정보 보호를 위해 담당자 연락처는 이 문서에 표시하지 않아요. 위키 문서 또는 거점별 정보 시트의 <strong style="color:var(--muted);">참조 탭</strong>을 확인해 주세요.</span></span></div>
+        <div class="ir"><span class="ik">수신</span><span class="iv">${mailTo}<br><span style="font-size:11px;color:var(--muted);">📋 개인정보 보호를 위해 담당자 연락처는 이 문서에 표시하지 않아요. <a href="${CONTACT_WIKI}" target="_blank" style="color:var(--a);text-decoration:none;">위키 문서</a> 또는 <a href="${CONTACT_SHEET}" target="_blank" style="color:var(--a);text-decoration:none;">거점별 정보 시트</a>의 <strong style="color:var(--muted);">참조 탭</strong>을 확인해 주세요.</span></span></div>
         <div class="ir"><span class="ik">참조</span><span class="iv">Workplace팀 + 소속 팀 (예: KDC팀)</span></div>
         <div class="ir"><span class="ik">첨부</span><span class="iv">위에서 작성한 지급품 일괄등록 양식</span></div>
       </div>
@@ -501,7 +502,7 @@ function renderResult(card) {
            <div class="ir"><span class="ik">주소</span><span class="iv">거점 주소 — <a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR" target="_blank">거점별 전체 정보 보기</a></span></div>
          </div>`
       : `<div class="ib">
-           <div class="ir"><span class="ik">담당자</span><span class="iv">${loc.team}<br><span style="font-size:11px;color:var(--muted);">📋 개인정보 보호를 위해 담당자 연락처는 이 문서에 표시하지 않아요. 위키 문서 또는 거점별 정보 시트의 <strong style="color:var(--muted);">참조 탭</strong>을 확인해 주세요.</span></span></div>
+           <div class="ir"><span class="ik">담당자</span><span class="iv">${loc.team}<br><span style="font-size:11px;color:var(--muted);">📋 개인정보 보호를 위해 담당자 연락처는 이 문서에 표시하지 않아요. <a href="${CONTACT_WIKI}" target="_blank" style="color:var(--a);text-decoration:none;">위키 문서</a> 또는 <a href="${CONTACT_SHEET}" target="_blank" style="color:var(--a);text-decoration:none;">거점별 정보 시트</a>의 <strong style="color:var(--muted);">참조 탭</strong>을 확인해 주세요.</span></span></div>
            <div class="ir"><span class="ik">주소</span><span class="iv">${loc.detail}</span></div>
          </div>`;
     html += item(n(), 'Kissflow 시스템 처리', '업무용 문서 발송 신청서 접수', false, `
