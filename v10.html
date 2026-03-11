@@ -170,8 +170,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 // Kissflow 여부는 거점 + 발송방법 조합으로 결정됨 (stepResult 참조)
 // ══════════════════════════════════════════════════════
 // 담당자 정보(이름·이메일)는 위키 문서에서 확인
-const CONTACT_WIKI = 'https://krafton.atlassian.net/wiki/x/fke3Lw';
-const CONTACT_SHEET = 'https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR';
+const CONTACT_WIKI  = 'https://krafton.atlassian.net/wiki/x/fke3Lw';
+const CONTACT_SHEET = 'https://blueholestudio.sharepoint.com/:x:/s/DevGrowth/IQA-8Wb99IMAQIumwEc27eZ0AZ1coiXvB3_37PnT0OlrYaw?e=nTcvSL';
+const LINK_FORM     = 'https://blueholestudio.sharepoint.com/:x:/s/DevGrowth/IQAc-J5J17gSRoCbUdRuLqbCAd4PrTXFmiQ1HZMMLRyBVhI?e=1apQl9';
+const LINK_EXAMPLE  = 'https://blueholestudio.sharepoint.com/:x:/s/DevGrowth/IQANygUfwnLIR6D0lIKbVJhyAX2XMTKdUObBSC_s-ttAmQo?e=ZBhlrx';
 
 const LOC = {
   // 역삼/서초/판교: 행낭 가능, 퀵 시 Kissflow 필요
@@ -435,8 +437,8 @@ function renderResult(card) {
     // ─── 2. 양식 작성 & 메일 발송 ──────────────────────────
     html += item(n(), '지급 요청 양식 작성 & 메일 발송', '양식 다운로드 → 거점별 시트 작성 → 메일 발송', false, `
       <div class="ib">
-        <div class="ir"><span class="ik">양식</span><span class="iv"><a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQCvXJzHQVLnSY6cEf6xv67iAXCAd6gXBFAiN5igIoesmkg" target="_blank">📎 지급품 일괄등록 양식 (다운로드)</a></span></div>
-        <div class="ir"><span class="ik">예시</span><span class="iv"><a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQAZAbgZkz-DSo57XALTnbq8AZFQwKwlhxO_zY_LBp2cB_4?e=cTdWh7" target="_blank">📋 작성 예시 보기</a></span></div>
+        <div class="ir"><span class="ik">양식</span><span class="iv"><a href="${LINK_FORM}" target="_blank">📎 지급품 일괄등록 양식 (다운로드)</a></span></div>
+        <div class="ir"><span class="ik">예시</span><span class="iv"><a href="${LINK_EXAMPLE}" target="_blank">📋 작성 예시 보기</a></span></div>
         <div class="ir"><span class="ik">작성</span><span class="iv">거점별 별도 시트 생성 (역삼은 EAST/WEST 분리) · 비고란: 물품 여러 개 시 쉼표 구분 — 예) "스티커, 수건, 하이볼"</span></div>
       </div>
       <div class="ib">
@@ -499,7 +501,7 @@ function renderResult(card) {
            <div style="font-size:11px;font-weight:700;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">수취인 2명 이상일 때</div>
            <div class="ir"><span class="ik">담당자</span><span class="iv">거점별 담당자 이름</span></div>
            <div class="ir"><span class="ik">연락처</span><span class="iv">(비공개) 시스템 내 확인</span></div>
-           <div class="ir"><span class="ik">주소</span><span class="iv">거점 주소 — <a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR" target="_blank">거점별 전체 정보 보기</a></span></div>
+           <div class="ir"><span class="ik">주소</span><span class="iv">거점 주소 — <a href="${CONTACT_SHEET}" target="_blank">거점별 전체 정보 보기</a></span></div>
          </div>`
       : `<div class="ib">
            <div class="ir"><span class="ik">담당자</span><span class="iv">${loc.team}<br><span style="font-size:11px;color:var(--muted);">📋 개인정보 보호를 위해 담당자 연락처는 이 문서에 표시하지 않아요. <a href="${CONTACT_WIKI}" target="_blank" style="color:var(--a);text-decoration:none;">위키 문서</a> 또는 <a href="${CONTACT_SHEET}" target="_blank" style="color:var(--a);text-decoration:none;">거점별 정보 시트</a>의 <strong style="color:var(--muted);">참조 탭</strong>을 확인해 주세요.</span></span></div>
@@ -511,7 +513,7 @@ function renderResult(card) {
       </div>
       ${kfRows}
       ${!isGrpA ? '<div class="wb">⚠️ 거점 담당자와 사전 개별 협의 후 신청 권장</div>' : ''}
-      <div class="nb">💡 거점별 담당자 정보는 <a href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR" target="_blank">거점별 전체 정보 보기</a> 참조</div>`);
+      <div class="nb">💡 거점별 담당자 정보는 <a href="${CONTACT_SHEET}" target="_blank">거점별 전체 정보 보기</a> 참조</div>`);
   }
 
   // ─── 5. 헬프/웰컴데스크 탭 신청 (grp A only) ──────────
@@ -551,10 +553,10 @@ function renderResult(card) {
 
   // ─── 빠른 링크 ─────────────────────────────────────────
   let qlLinks = `
-    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQCvXJzHQVLnSY6cEf6xv67iAXCAd6gXBFAiN5igIoesmkg" target="_blank">📎 지급품 일괄등록 양식</a>
-    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQAZAbgZkz-DSo57XALTnbq8AZFQwKwlhxO_zY_LBp2cB_4?e=cTdWh7" target="_blank">📋 양식 작성 예시</a>
-    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:f:/s/KDCPlanningSHP/IgA6c7TI4-bQRY2U68n2LSI4AWbuYB1ILle4_zU7ctu1gvE" target="_blank">🗂️ 거점별 양식 & 정보 폴더</a>
-    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR" target="_blank">📍 거점별 전체 정보 (담당자 목록)</a>`;
+    <a class="ql-a" href="${LINK_FORM}" target="_blank">📎 지급품 일괄등록 양식</a>
+    <a class="ql-a" href="${LINK_EXAMPLE}" target="_blank">📋 양식 작성 예시</a>
+    <a class="ql-a" href="https://blueholestudio.sharepoint.com/:f:/s/DevGrowth/IgBfWarRLL-yR6ocgfxlf5Q3Ad58Uv_ewnD2XaPp3lsE4Wg?e=fiJ5sN" target="_blank">🗂️ 거점별 양식 & 정보 폴더</a>
+    <a class="ql-a" href="${CONTACT_SHEET}" target="_blank">📍 거점별 전체 정보 (담당자 목록)</a>`;
   if (kf) qlLinks += `<a class="ql-a" href="https://krafton.kissflow.com/view/process/DSA/myitems/Draft" target="_blank">⚙️ Kissflow 신청서</a>`;
 
   html += `
@@ -695,11 +697,11 @@ render();
 
 // ── 위키/SharePoint 링크 상수 ──────────────────────────
 const LINK = {
-  wiki:    'https://krafton.atlassian.net/wiki/x/fke3Lw',
-  form:    'https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQCvXJzHQVLnSY6cEf6xv67iAXCAd6gXBFAiN5igIoesmkg',
-  example: 'https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQAZAbgZkz-DSo57XALTnbq8AZFQwKwlhxO_zY_LBp2cB_4?e=cTdWh7',
-  contacts:'https://blueholestudio.sharepoint.com/:x:/s/KDCPlanningSHP/IQDpjnI-wBX3SJxe4Re9CrIAAXod1A4Z5myCEzMeGoUlEo4?e=PswMGR',
-  folder:  'https://blueholestudio.sharepoint.com/:f:/s/KDCPlanningSHP/IgA6c7TI4-bQRY2U68n2LSI4AWbuYB1ILle4_zU7ctu1gvE',
+  wiki:    CONTACT_WIKI,
+  form:    LINK_FORM,
+  example: LINK_EXAMPLE,
+  contacts: CONTACT_SHEET,
+  folder:  'https://blueholestudio.sharepoint.com/:f:/s/DevGrowth/IgBfWarRLL-yR6ocgfxlf5Q3Ad58Uv_ewnD2XaPp3lsE4Wg?e=fiJ5sN',
   kissflow:'https://krafton.kissflow.com/view/process/DSA/myitems/Draft',
 };
 function wikiLink(text, url) { return `<a class="cb-wiki-link" href="${url}" target="_blank">📎 ${text}</a>`; }
